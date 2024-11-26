@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Loading CSS files -->
+    <link rel="stylesheet" href="./static/css/styles.css">
+    <link rel="stylesheet" href="./static/libraries/jquery-ui-1.14.1/jquery-ui.min.css">
+
+    <!-- Loading font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Alegreya+Sans:ital,wght@0,100;0,300;0,400;0,500;0,700;0,800;0,900;1,100;1,300;1,400;1,500;1,700;1,800;1,900&family=Alegreya:ital,wght@0,400..900;1,400..900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+
+    <!-- Loading javascript libraries -->
+    <script src="./static/libraries/jquery-3.7.1.min.js"></script>
+    <script src="./static/libraries/jquery-ui-1.14.1/jquery-ui.min.js"></script>
+
+    <!-- Loading chart.js for plots -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Linking javascript file -->
+    <script src="./static/js/script.js"></script>
+
+    <title>Control Sliders Experiment</title>
+</head>
+
+<body onload="start();">
+    <!-- onload="start();" means that the function onload will run when the page loads -->
+
+    <!-- Instructions -->
+    <div id="instructions">
+        <div id="ins_1" class="slide">
+			<img src="./static/assets/images/PPLS.png" alt="ex1" style="float: right; width: 400px;">
+			<br /><br />
+			<h1>Information sheet for participants</h1>
+			
+            <br />
+            <!-- Fake study name -->
+            <b>Study title:</b> Learning Strategies in Dynamic Control Environments<br />
+            <b>Principal Investigator:</b> Neil Bramley<br />
+            <b>Researcher collecting data:</b> Joshua Hew<br /><br />
+            
+            <p>
+                <b>What is this document?</b> 
+                This document explains what kind of study we’re doing, outlines your rights, and details the handling of your data. 
+                We recommend printing this page for your records.
+            </p>
+            
+            <p>
+                <b>Nature of the study.</b> 
+                You are invited to participate in a study which involves interacting with simple sliders on your screen and answering questions about your observations. Your interactions with the sliders and responses will be recorded. 
+                Your session should last for ? to ? minutes. 
+                You will be given full instructions shortly.
+            </p>
+            
+            <p>
+                <b>Compensation.</b> 
+                For your participation in this study, you will be paid a base rate of £? and a bonus of up to £? depending on your performance. 
+            </p>
+            
+            <p>
+                <b>Risks and benefits.</b> 
+                There are no known risks to participation in this study. 
+                Other than the payment mentioned, there are no tangible benefits to you, however you will be contributing to our knowledge about causal learning.
+            </p>
+            
+            <p>
+                <b>Confidentiality and use of data.</b> 
+                All the information we collect during the course of the research will be processed in accordance with Data Protection Law. 
+                In order to safeguard your privacy, we will never share personal information (like names or dates of birth) with anyone outside the research team. 
+                Your data will be referred to by a unique participant number rather than by name. 
+                Please note that we will temporarily collect your IP address to prevent repeat participation, however we will never share this information with anyone outside the research team. 
+                We will store your IP address using the University of Edinburghs secure encrypted data base and delete it upon completion of the study. 
+                The anonymised data collected during this study will be used for research purposes only.
+            </p>
+            
+            <p>
+                <b>What are my data protection rights?</b> 
+                The University of Edinburgh is a Data Controller for the information you provide. 
+                You have the right to access information held about you. 
+                Your right of access can be exercised in accordance with Data Protection Law. 
+                You also have other rights including rights of correction, erasure and objection. 
+                For more details, including the right to lodge a complaint with the Information Commissioners Office, please visit www.ico.org.uk. 
+                Questions, comments and requests about your personal data can also be sent to the University Data Protection Officer at dpo@ed.ac.uk. 
+            </p>
+
+            <p>
+                <b>Voluntary participation and right to withdraw.</b> 
+                Your participation is voluntary, and you may withdraw from the study at any time and for any reason during the experiment. 
+                If you withdraw from the study during data gathering, we will delete your data and there is no penalty or loss of benefits to which you are otherwise entitled. 
+                You cannot withdraw from this study after completion of the task because your data will be stored anonymously. 
+            </p>
+            
+            <p>
+                If you have any questions about what you have just read, please feel free to ask, or contact us later. 
+                You can contact us by email at s2144522@ed.ac.uk. 
+                This project has been approved by the PPLS Ethics committee. 
+                If you have questions or comments regarding your rights as a participant, please contact the School Research Ethics Convenor at or ppls.rec@ed.ac.uk                
+            </p>
+
+            <p>
+                <b>By clicking the button below, you consent to the following:<br /><br />
+                1.	I agree to participate in this study.<br />
+                2.	I confirm that I have read and understood how my data will be stored and used.<br />
+                3.	I understand that I have the right to terminate this session at any point. <br /></b>
+            </p>
+
+			<br />
+			<p><span>Please enter your Prolific ID:</span></p>
+			<br />
+			<div style="text-align: center;">
+				<input type="text" class = "get_proid" name="proid" id="proid" size="50">
+			</div>
+			<br /><br />
+			<div align=center><button id="done_consent" class="experiment-button"><b>I consent to the above information</b></button></div>
+			<br />
+			<!-- <div align=center><button id = "straight_to_task" class="ins_btn btn-primary btn-lg"><b>Task</b></button></div> -->
+			<!-- <div align=center><button class='btn-primary btn-lg' id='straight_to_debrief'> Dont Press This Button (Debrief)</button></div>  -->
+
+		</div>
+    </div>
+
+
+    <!-- Placeholder: Experimental task -->
+    <div id="experiment-task">
+        <div id="task-header"></div>
+
+        
+            
+        </div>
+
+        <div id="task-display">
+            <div class="chart-container">
+                <canvas id="progress-chart" style="width: 100%; height: 100%"></canvas>
+            </div>
+            <div class="slider-container">
+                <div class="slider-box" id="slider-sub-container-x">
+                    <div id="slider_x"></div>
+                </div>
+
+                <!-- <div class="slider-box" id="slider-sub-container-y">
+                    <div id="slider_y"></div>
+                </div>
+
+                <div class="slider-box" id="slider-sub-container-z">
+                    <div id="slider_z"></div> -->
+                </div>
+            </div>
+            <div id="output"></div>
+        </div>
+
+
+        <!-- <button onclick="redirect()">HAPPY HAPPY HAPPY</button> -->
+    </div>
+
+</body>
+
+
+
+</html>
