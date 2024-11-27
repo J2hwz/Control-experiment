@@ -15,14 +15,21 @@ function start() {
 // Setup sliders to control variables
 function set_sliders() {
     // This is the slider function from jquery-ui package
-    $("#slider_x").slider({
+    $("#slider-x").slider({
         // create: function() { // This event is triggered when slider is created, sets the initial value of slider to x (preset = 0)
         //     $("#slider_x").slider("value", x) 
         // };
         
-        min: 0,
+        // min: 0,
+        // max: 50,
+        // value: 25, // Initial slider value
+
+        orientation: "vertical",
+        animate: "fast",
+        range: "min",
+        min: 0, 
         max: 50,
-        value: 25, // Initial slider value
+        value: 25,
 
         // slide: function(event, ui) {
         //     record_value(ui.value); // Record value on slide with function; Slide meaning that every integer move
@@ -32,9 +39,25 @@ function set_sliders() {
         }
     });
 
-    // $("#slider_y").slider();
+    $("#slider-y").slider({
+        orientation: "vertical",
+        animate: "fast",
+        range: "min",
+        min: 0, 
+        max: 50,
+        value: 25,
+    });
 
-    // $("#slider_z").slider();
+    // var $sliders = $(".slider");
+
+    // $sliders.slider({
+    //     orientation: "vertical",
+    //     animate: "fast",
+    //     range: "min",
+    //     min: 0, 
+    //     max: 50,
+    //     value: 25,
+    // });
 }
 
 function record_value(value) {
@@ -72,14 +95,6 @@ function setup_chart() {
 
         options: {   
             scales: {
-                // yAxes: [{
-                //     display: true,
-                //     ticks: {
-                //         suggestedMin: 0,
-                //         suggestedMax: 50,
-                //         beginAtZero: false
-                //     }
-                // }]
                 y: {
                     suggestedMin: 0, 
                     suggestedMax: 50,
