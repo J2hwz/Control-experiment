@@ -58,7 +58,7 @@ body {
     align-self: center;
 } */
 
-#slider-x, #slider-y {
+#slider-x, #slider-y, #slider-z {
     height: 100%;
     /* align-self: center; */
 }
