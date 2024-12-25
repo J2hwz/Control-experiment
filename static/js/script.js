@@ -1,15 +1,21 @@
 // var x = 0;
 
-var time_step = 4000; // 4000 ms per step in the experiment
+var time_step = 2000; // 4000 ms per step in the experiment
 var timeout = 40; // Maximum number of steps per trial
 
-
+// Slider variables
 var xclicked = false;
 var yclicked = false; 
 var zclicked = false;
 var x = 0;
 var y = 0;
 var z = 0;
+
+// Chart variables
+var reward_centre = 50; // Centre of shaded reward region
+var reward_width = 30; // 1/2 width of shaded reward region
+// var rShade = 'rgb(212, 175, 55, .5)';
+var n_datapoints = 15; // Maximum number of datapoints to be plotted
 
 
 // OU network variables 
@@ -18,16 +24,16 @@ var yHist = [0];                // List of values Y (int)
 var zHist = [0];                // List of values Z (int)
 
 // var dt = 1;                          
-var sigma = 5;                          
-var theta = .5;
+var sigma = 5; // Amount of noise added to system                     
+var theta = .5; // How strong the connections are 
 var causes = {
     'x': [0,0,0],
     'y': [1,0,0],
-    'z': [0,0,1]
+    'z': [0,1,0]
 }
 
-let sliderValues = []
-const labels = [...Array(10).keys()]
+
+
 
 // This function runs when the page loads, shows/hides sections of the html code
 function start() {
@@ -105,20 +111,6 @@ function set_sliders() {
     }));
 }
 
-
-// function record_value(value) {
-//     if (sliderValues.length > 10) {
-//         sliderValues.shift();
-//     } 
-
-//     // update_output();
-//     add_data(chart, value);
-// }
-
-// function update_output() {
-//     $("#output").html(`Recorded Values: ${sliderValues.join(', ')}`);
-// }
-
 function setup_chart() {
     var canvas_html = "<canvas id='progress-chart'></canvas>";
     $(".chart-container").html(canvas_html); // Replacing the chart-container div with a chart from chart.js
@@ -135,31 +127,37 @@ function setup_chart() {
             datasets: [{
                 label: "X", // X datapoints
                 data: [0],
-                tension: 0 // Disable line smoothing
+                tension: 0, // Disable line smoothing
+                pointRadius: 4
             },
             {
                 label: "Y", // Y datapoints
                 data: [0],
-                tension: 0 // Disable line smoothing
+                tension: 0, // Disable line smoothing
+                pointRadius: 4
             },
             {
                 label: "Z", // Z datapoints
                 data: [0],
-                tension: 0 // Disable line smoothing
+                tension: 0, // Disable line smoothing
+                pointRadius: function(context) {
+                    var index = context.dataIndex;
+                    var value = context.dataset.data[index];
+                    var rew_min = reward_centre - reward_width;
+                    var rew_max = reward_centre + reward_width;
+
+                    if (value >= rew_min && value <= rew_max) {
+                        return 7; // Bigger radius for points inside shaded range
+                    } else {
+                        return 4; // Same point radius as X or Y otherwise
+                    }
+                },
             }
         ]
         },
 
         options: {   
             scales: {
-                // yAxes: [{
-                //     display: true,
-                //     ticks: {
-                //         suggestedMin: -100, // minimum will be 0, unless there is a lower value.
-                //         suggestedMax: 100,
-                //         beginAtZero: false // minimum value will be 0.
-                //     }
-                // }],
                 x: {
                     title: {
                         display: true,
@@ -169,12 +167,25 @@ function setup_chart() {
                 y: {
                     suggestedMin: -100, 
                     suggestedMax: 100,
-                    beginAtZero: true
+                    beginAtZero: false
+                },
+            },
+
+            // Adding shading for reward area 
+            plugins: {
+                annotation: {
+                    annotations: {
+                        box1: {
+                            type: 'box',
+                            yMin: reward_centre - reward_width,
+                            yMax: reward_centre + reward_width,
+                            borderWidth: 0,
+                            backgroundColor: 'rgba(255, 99, 132, 0.25)'
+                        }
+                    }
                 }
             }
         }
-
-        // TODO: Add reward area shading and change size depending on experimental condition 
     })
 }
 
@@ -203,6 +214,7 @@ function setupInterface() {
         $('#start_button').hide();
         $('#slider-x').slider('enable');
         $('#slider-y').slider('enable');
+
         count = 0;
 
         record(x, y, z)
@@ -211,11 +223,12 @@ function setupInterface() {
         // record(x, y, z, xclicked, yclicked, zclicked, 0, false, condition_count, condition, counter_balance_order[condition_count], Number(bonus), 1);
         
         // Main game loop is here
-        interval = setInterval(Step, time_step)
+        interval = setInterval(step, time_step)
     })
 }
 
-function Step() {
+// Main game loop
+function step() {
             
     // Advance Count
     count = count + 1;
@@ -231,9 +244,9 @@ function Step() {
         add_data(chart, new_step, [x, y, z]);
 
         // Remove data if too much is plotted here max datapoints is
-        // if (chart.data.datasets[0].data.length > 15/dt) {
-        //     removeData(chart);
-        // }
+        if (chart.data.datasets[0].data.length > n_datapoints) {
+            removeData(chart);
+        }
 
         // // Visualise countdown
         // if ((timeout-count) % (1000/time_step) === 0) {
@@ -284,6 +297,7 @@ function Step() {
     }
 }
 
+// Add data to chart for each step
 function add_data(chart, step_count, new_data) {
     chart.data.labels.push(round(step_count, 1)); // Add step count on x-axis
     chart.data.datasets.forEach((dataset, index) => { // Add x, y, z data for each index in the list
@@ -292,7 +306,13 @@ function add_data(chart, step_count, new_data) {
     chart.update();
 }
 
-
+// Remove old datapoints from chart if too many plotted
+function removeData(chart) {
+    chart.data.labels.shift();
+    chart.data.datasets.forEach((dataset) => {
+        dataset.data.shift();
+    });
+    chart.update();}
 
 // OU Network Computation
 /////////////////////////
@@ -311,7 +331,7 @@ function ouNetwork() {
             var new_value = parseInt($slider.slider('value')); // If either x or y slider is clicked during that step, retain that value, else apply ou increment on other values
         } else {
             mean_attractor = attractor(var_name, causes);
-            var new_value = ouIncrement(var_name, sigma, theta, mean_attractor); // ouIncrement(old_value, sigma, dt, theta, mean_attractor);
+            var new_value = ouIncrement(var_name, mean_attractor); // ouIncrement(old_value, sigma, dt, theta, mean_attractor);
         }
 
         if (new_value > 100) {
@@ -341,10 +361,13 @@ function ouIncrement(variable_name, attractor) {
     var last_step = count - 1;
 
     if (variable_name == 'x') {
+        // console.log(theta*(attractor-xHist[last_step]));
         return xHist[last_step] + theta*(attractor-xHist[last_step]) + sigma*normalRandom();
     } else if (variable_name == 'y') {
+        // console.log(theta*(attractor-yHist[last_step]));
         return yHist[last_step] + theta*(attractor-yHist[last_step]) + sigma*normalRandom();
     } else {
+        // console.log(theta*(attractor-zHist[last_step]));
         return zHist[last_step] + theta*(attractor-zHist[last_step]) + sigma*normalRandom();
     }
 }
