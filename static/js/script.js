@@ -2,6 +2,7 @@
 
 var time_step = 2000; // 4000 ms per step in the experiment
 var timeout = 40; // Maximum number of steps per trial
+var score = 0; // Total Score (successful control)
 
 // Slider variables
 var xclicked = false;
@@ -13,7 +14,7 @@ var z = 0;
 
 // Chart variables
 var reward_centre = 50; // Centre of shaded reward region
-var reward_width = 30; // 1/2 width of shaded reward region
+var reward_width = 10; // 1/2 width of shaded reward region
 // var rShade = 'rgb(212, 175, 55, .5)';
 var n_datapoints = 15; // Maximum number of datapoints to be plotted
 
@@ -62,10 +63,10 @@ function set_sliders() {
             $("#slider-x").slider("value", x);
         },
 
-        // slide: function(event, ui) {
-        //     x = parseInt($('#slider-x').slider("value"));
-        //     xclicked = true;
-        // }, 
+        slide: function(event, ui) {
+            x = parseInt($('#slider-x').slider("value"));
+            xclicked = true;
+        }, 
 
         change: function(event, ui) { // Change value of x when participant stops dragging slider i.e. slider changes value
             x = parseInt($('#slider-x').slider("value"));
@@ -85,10 +86,10 @@ function set_sliders() {
             $("#slider-y").slider("value", y);
         },
 
-        // slide: function(event, ui) {
-        //     y = parseInt($('#slider-y').slider("value")); // Record value on slide with function; Slide meaning that every integer move
-        //     yclicked = true;
-        // }, 
+        slide: function(event, ui) {
+            y = parseInt($('#slider-y').slider("value")); // Record value on slide with function; Slide meaning that every integer move
+            yclicked = true;
+        }, 
         
         change: function(event, ui) {
             y = parseInt($('#slider-y').slider("value"));
@@ -248,24 +249,24 @@ function step() {
             removeData(chart);
         }
 
-        // // Visualise countdown
-        // if ((timeout-count) % (1000/time_step) === 0) {
-        //     $("#countdown").html("Steps: " + count  + "/" + timeout);
-        // }
+        // Visualise countdown
+        if ((timeout - count) % (1000/time_step) === 0) {
+            $("#countdown-display").html("<i>Steps: " + count  + "/" + timeout + "</i>");
+        }
 
         // Visualise score (increase if target in range)
-        // var reward = false;
-        // if (z <= (reward_centre + reward_width) && z >= (reward_centre - reward_width)) {       
-        //     score++;
-        //     reward = true;
+        var reward = false;
+        if (z <= (reward_centre + reward_width) && z >= (reward_centre - reward_width)) {       
+            score++;
+            reward = true;
 
-        //     if (bonus < 1.48) {
-        //         bonus = (2* score * bonus_pay / (n_conditions * timeout)).toFixed(2);
-        //     } else {
-        //         bonus = (1.50).toFixed(2);
-        //     };
-        //     $("#score_display").html("<b><font color=#D4AF37>Bonus Pay: £"+bonus+"</font></b>");
-        // }
+            // if (bonus < 1.48) {
+            //     bonus = (2* score * bonus_pay / (n_conditions * timeout)).toFixed(2);
+            // } else {
+            //     bonus = (1.50).toFixed(2);
+            // };
+            $("#score-display").html("<b>Score: " + score + "</b>");
+        }
         
         // Record whether participant had the tab open or closed
         // if (document.hasFocus()) {
