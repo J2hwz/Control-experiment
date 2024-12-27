@@ -33,6 +33,7 @@
 
     <!-- Instructions -->
     <div id="instructions">
+        <div align=center><button id = "straight_to_task"><b>Go straight to task</b></button></div>
         <div id="ins_1" class="slide">
 			<img src="./static/assets/images/PPLS.png" alt="ex1" style="float: right; width: 400px;">
 			<br /><br />
@@ -125,12 +126,12 @@
     </div>
 
 
-    <!-- Placeholder: Experimental task -->
-    <div id="experiment-task">
+    <!-- Experimental task -->
+    <div id="experiment-trial">
         <!-- Header -->
         <div id="task-header">
-            <h1>Training round 1</h1>
-            <p style="text-align: center" id="score-display"><b>Score: 0</b></p>
+            <h1 id="trial_display">Training Round 1</h1>
+            <!-- <p style="text-align: center" id="score-display"><b>Score: 0</b></p> -->
             <p style="text-align: center" id="countdown-display"><i>Steps: 0/40</i></p>
         </div>
 
@@ -156,11 +157,20 @@
 
         <div class='slide' align=center>
 			<button id='start_button'>Start</button>
+            <button id='view_score_button'>View Score</button>
 		</div>
-        <div id="output"></div>
+    </div>
 
-
-        <!-- <button onclick="redirect()">HAPPY HAPPY HAPPY</button> -->
+    <!-- Task Score -->
+    <div id="trial_score">
+        <div id="task-header">
+            <h1 id="trial_display_score">Training Round 1</h1>
+            <p style="text-align: center" id="score-display"><b>Score: 0</b></p>
+            <!-- <p style="text-align: center" id="countdown-display"><i>Steps: 0/40</i></p> -->
+        </div>
+        <div class='slide' align=center>
+			<button id='next_trial_button'>Next Trial</button>
+		</div>
     </div>
 
 </body>

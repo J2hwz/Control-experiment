@@ -1,8 +1,26 @@
-// var x = 0;
+// TODO
+// Add instructions 
+// Differentiate between training and testing rounds 
+// Deduct scores for interventions 
+// CSS styling
 
-var time_step = 2000; // 4000 ms per step in the experiment
-var timeout = 40; // Maximum number of steps per trial
+
+// Trial variables
+var n_trials = 6;
+var order_all = [1,2,3,4,5,6]; 
+
+// Counterbalance variables
+var counter_balance = ["A", "B"];
+var counter_balance_order = [];
+
+// Condition variables 
+var conditions = ["P", "Q", "R", "S"];
+
+// Task variables
+var time_step = 1000; // 4000 ms per step in the experiment
+var timeout = 20; // Maximum number of steps per trial
 var score = 0; // Total Score (successful control)
+
 
 // Slider variables
 var xclicked = false;
@@ -18,33 +36,270 @@ var reward_width = 10; // 1/2 width of shaded reward region
 // var rShade = 'rgb(212, 175, 55, .5)';
 var n_datapoints = 15; // Maximum number of datapoints to be plotted
 
-
 // OU network variables 
-var xHist = [0];                // List of values X (int)
-var yHist = [0];                // List of values Y (int)
-var zHist = [0];                // List of values Z (int)
-
-// var dt = 1;                          
+var xHist = [0]; // List of values X (int)
+var yHist = [0]; // List of values Y (int)
+var zHist = [0]; // List of values Z (int)
+                        
 var sigma = 5; // Amount of noise added to system                     
-var theta = .5; // How strong the connections are 
+var theta = .7; // How strong the connections are 
 var causes = {
     'x': [0,0,0],
-    'y': [1,0,0],
-    'z': [0,1,0]
+    'y': [0,0,0],
+    'z': [0,0,0]
+}
+
+// Causal graph presets
+var presets = {
+    'Reg': {
+        'x': [0, 0, 0],
+        'y': [0, 0, 0],
+        'z': [1, -1, 0]
+    },
+    'Inv': {
+        'x': [0, 0, 0],
+        'y': [0, 0, 0],
+        'z': [-1, 0, 0]
+    },
+    'Common_2': {
+        'x': [0, 0, 0],
+        'y': [-1, 0, 0],
+        'z': [-1, 1, 0]
+    },
+    'Common_2_B': {
+        'x': [0, -1, 0],
+        'y': [0, 0, 0],
+        'z': [1, -1, 0]
+    },
+    'Chain_2': {
+        'x': [0, -1, 0],
+        'y': [0, 0, 0],
+        'z': [-1, 0, 0]
+    },
+    'Chain_2_B': {
+        'x': [0, 0, 0],
+        'y': [-1, 0, 0],
+        'z': [0, -1, 0]
+    },
+    'Common_3': {
+        'x': [0, 1, 0],
+        'y': [0, 0, 0],
+        'z': [-1, -1, 0]
+    },
+    'Common_3_B': {
+        'x': [0, 0, 0],
+        'y': [1, 0, 0],
+        'z': [-1, -1, 0]
+    },
+    'ChainFeed_5': {
+        'x': [0, -1, 1],
+        'y': [0, 0, 0],
+        'z': [-1, 0, 0]
+    },
+    'ChainFeed_5_B': {
+        'x': [0, 0, 0],
+        'y': [-1, 0, 1],
+        'z': [0, -1, 0]
+    },
+    'ChainFeed_2': {
+        'x': [0, 0, 1],
+        'y': [0, 0, 0],
+        'z': [-1, -1, 0]
+    },
+    'ChainFeed_2_B': {
+        'x': [0, 0, 0],
+        'y': [0, 0, 1],
+        'z': [-1, -1, 0]
+    },
+    'CommonFeed_1': {
+        'x': [0, -1, -1],
+        'y': [0, 0, 0],
+        'z': [-1, -1, 0]
+    },
+    'CommonFeed_1_B': {
+        'x': [0, 0, 0],
+        'y': [-1, 0, -1],
+        'z': [-1, -1, 0]
+    }
 }
 
 
 
+// ---------------- Main navigation functions ---------------- //
 
 // This function runs when the page loads, shows/hides sections of the html code
 function start() {
-    $('#instructions').hide();
-    $('#experiment-task').show();
+    $('#instructions').show();
+    $('#experiment-trial').hide();
+    $('#trial_score').hide();
 
-    set_sliders();
-    setup_chart();
-    setupInterface();
+    // Buttons for testing (skip explanations)
+    $('#straight_to_task').click(function () { 
+        console.log('STARTING TASK');   
+        goto_task();
+    }); 
+
+    setup_task();
 }
+
+// Go to main task
+function goto_task() {
+    $('#instructions').hide();
+    $('#experiment-trial').show();
+    $('#trial_score').hide();
+
+    // Set up Experimental Conditions
+    trial = order[trial_count]; // Call the first causal graph condition 
+    load_graph(trial); // Load the assigned condition
+
+    // $("#condition_display").html("Round: " + (condition_count+1) + "/" + n_conditions);
+}
+
+// Go to score slide after each trial
+function goto_score() {
+    $('#instructions').hide();
+    $('#experiment-trial').hide();
+    $('#trial_score').show();
+}
+
+// Initial setup of the experimental task
+function setup_task() {
+
+    // Initialise the trial_count
+    trial_count = 0;
+
+    // Randomise array containing trial order
+    order = ex_randomiser(order_all);
+
+    // Hide slider Z that participants shouldn't control
+    $("#slider-z").hide();  
+
+    // Randomly choose condition and setup
+    setup_condition();
+
+    // Setup slider positions 
+    set_sliders();
+
+    // Setup chart and variables 
+    setup_chart();
+
+    // Setup interface logic 
+    setup_interface();
+}
+
+
+
+// -------- Functions to reset chart and sliders between trials -------- //
+
+// Load graph for each trial count 
+function load_graph(graph) {
+
+    // Counterbalancing 
+    var random_counter_balance = counter_balance[Math.floor(Math.random() * counter_balance.length)];
+    counter_balance_order.push(random_counter_balance);
+
+    if (graph == 1 && random_counter_balance == "A"){
+        update_model('Common_2');
+        console.log('Graph 1A');
+    } else if (graph == 2 && random_counter_balance == "A"){
+        update_model('Chain_2');
+        console.log('Graph 2A');
+    } else if (graph == 3 && random_counter_balance == "A"){
+        update_model('Common_3');
+        console.log('Graph 3A');
+    } else if (graph == 4 && random_counter_balance == "A"){
+        update_model('ChainFeed_5');
+        console.log('Graph 4A');
+    } else if (graph == 5 && random_counter_balance == "A"){
+        update_model('ChainFeed_2');
+        console.log('Graph 5A');
+    } else if (graph == 6 && random_counter_balance == "A"){
+        update_model('CommonFeed_1');
+        console.log('Graph 6A');
+    } else if (graph == 1 && random_counter_balance == "B"){
+        update_model('Common_2_B');
+        console.log('Graph 1B');
+    } else if (graph == 2 && random_counter_balance == "B"){
+        update_model('Chain_2_B');
+        console.log('Graph 2B');
+    } else if (graph == 3 && random_counter_balance == "B"){
+        update_model('Common_3_B');
+        console.log('Graph 3B');
+    } else if (graph == 4 && random_counter_balance == "B"){
+        update_model('ChainFeed_5_B');
+        console.log('Graph 4B');
+    } else if (graph == 5 && random_counter_balance == "B"){
+        update_model('ChainFeed_2_B');
+        console.log('Graph 5B');
+    } else {
+        update_model('CommonFeed_1_B');
+        console.log('Graph 6B');
+    }
+}
+
+// Helper: Update causal model with the selected preset 
+function update_model(preset) {
+    causes = presets[preset];
+
+    // var presetValues = presets[preset];
+
+    // Set Causal Graph Values
+    // causes['X'] = presetValues.slice(0, 3);
+    // causes['Y'] = presetValues.slice(3, 6);
+    // causes['Z'] = presetValues.slice(6, 9);
+    // var presetLabels = presetValues.slice(9);
+
+    // Set Slider Label
+    // $('#x_label').html('');
+    // $('#y_label').html('');
+    // $('#z_label').html('');
+
+    // Set Slider Handle Label
+    // $('#custom-handle-1').html(presetLabels[0]);
+    // $('#custom-handle-2').html(presetLabels[1]);
+    // $('#custom-handle-3').html(presetLabels[2]);
+
+    // Set Chart Lable
+    setup_chart();
+
+    // if (presetLabels[1] == 'B') {
+    //     $('.graph-pred-rec-right').css('visibility', 'hidden');
+    //     $('#custom-handle-1, #custom-handle-2, #custom-handle-3').css({
+    //         'line-height': '3em',
+    //         'font-size': 'smaller'
+    //     });
+        
+    // } else {
+    //     $('.graph-pred-rec-right').css('visibility', 'visible');
+    //     $('#custom-handle-1, #custom-handle-2, #custom-handle-3').css({
+    //         'line-height': '1.5em',
+    //         'font-size': 'smaller'
+    //     });
+    // };
+}
+
+function setup_condition(){
+    condition = conditions[Math.floor(Math.random() * conditions.length)];
+
+    if (condition == "P"){
+        // Low reward saliency, high control
+
+    } else if (condition == "Q"){
+        // Low reward saliency, low control
+        theta = .3
+    } else if (condition == "R"){
+        // High reward saliency, high control
+        reward_width = 20;
+    } else {
+        // High reward saliency, low control
+        reward_width = 20;
+        theta = .3
+    }
+
+    console.log(condition, theta, reward_width);
+}
+
+
 
 // Setup sliders to control variables using slider function in jquery
 function set_sliders() {
@@ -118,6 +373,9 @@ function setup_chart() {
     // Have to ask Neil why this is needed
     var ctx = document.getElementById("progress-chart").getContext("2d") // Fetches a 2D drawing context of the newly created canvas element
 
+    Chart.defaults.font.size = 18; // Changing default size of all fonts in the chart
+
+
     chart = new Chart(ctx, {
         // Type of chart: Line chart
         type: "line",
@@ -129,13 +387,13 @@ function setup_chart() {
                 label: "X", // X datapoints
                 data: [0],
                 tension: 0, // Disable line smoothing
-                pointRadius: 4
+                pointRadius: 3
             },
             {
                 label: "Y", // Y datapoints
                 data: [0],
                 tension: 0, // Disable line smoothing
-                pointRadius: 4
+                pointRadius: 3
             },
             {
                 label: "Z", // Z datapoints
@@ -150,7 +408,7 @@ function setup_chart() {
                     if (value >= rew_min && value <= rew_max) {
                         return 7; // Bigger radius for points inside shaded range
                     } else {
-                        return 4; // Same point radius as X or Y otherwise
+                        return 3; // Same point radius as X or Y otherwise
                     }
                 },
             }
@@ -162,7 +420,7 @@ function setup_chart() {
                 x: {
                     title: {
                         display: true,
-                        text: 'Steps'
+                        text: 'Steps',
                     }
                 },
                 y: {
@@ -172,8 +430,8 @@ function setup_chart() {
                 },
             },
 
-            // Adding shading for reward area 
-            plugins: {
+            plugins: {    
+                // Adding shading for reward area 
                 annotation: {
                     annotations: {
                         box1: {
@@ -190,7 +448,7 @@ function setup_chart() {
     })
 }
 
-function setupInterface() {
+function setup_interface() {
 
     // Conditions
     // $('.condition_container').css({
@@ -205,7 +463,7 @@ function setupInterface() {
     // Buttons
     //$('#task_next_round_btn').hide();
     // $('#task_cont_btn').hide();
-    // $('#causal_query_btn').hide();
+    $('#view_score_button').hide();
 
     // $("#countdown").html("Steps: 0/" + timeout);
 
@@ -225,7 +483,62 @@ function setupInterface() {
         
         // Main game loop is here
         interval = setInterval(step, time_step)
-    })
+    });
+
+    // If view score button is clicked 
+    $('#view_score_button').click(function() {
+        $('#next_trial_button').show();
+
+        goto_score();
+    });
+
+    // If next trial button on the score display is clicked 
+    $('#next_trial_button').click(function() {
+        $('#next_trial_button').hide();
+
+        //Initialise New Condition
+        if (trial_count < (n_trials - 1)){
+            // $('.likert-scale input[type="radio"]').prop('checked', false);
+            $('#experiment-trial').show();
+            $('#trial_score').hide();
+            $('#view_score_button').hide();
+
+            //------ Reset Task Interface -----//
+            
+            // Stopping the unique interval ID
+            clearInterval(interval);
+
+            // Reseting the slider values back to 0
+            $('.slider').slider("value", 0);
+
+            // Reseting array of x, y, & z values 
+            xHist = [0];  
+            yHist = [0]; 
+            zHist = [0];             
+
+            // Prompting participant
+            alert('You will now move to round ' + (trial_count + 2) +' of ' + n_trials + '. Remember, the connection between the sliders may be different this time.');
+            
+            $('#start_button').show();
+
+            trial_count += 1;
+            
+            // Loading in causal graph of next trial
+            trial = order[trial_count];
+            load_graph(trial);
+
+            $("#trial_display").html("Training Round " + (trial_count + 1));
+            $("#trial_display_score").html("Training Round " + (trial_count + 1));
+            $("#countdown-display").html("Steps: 0/" + timeout);
+            // $("#score_display").html("<b><font color=#D4AF37>Bonus Pay: £"+bonus+"</font></b>");
+        } else{
+            // $('#next_rnd_btn').hide();
+            // alert('You have completed the tasks! Press "Continue" to move to the debrief section.')
+            // $('#task_cont_btn').show();
+        }
+    });
+
+
 }
 
 // Main game loop
@@ -294,7 +607,8 @@ function step() {
     if (count > timeout){
         //Reset Task
         $('#slider-x').slider('disable');
-        // $('#causal_query_btn').show();
+        $('#slider-y').slider('disable');
+        $('#view_score_button').show();
     }
 }
 
@@ -313,10 +627,10 @@ function removeData(chart) {
     chart.data.datasets.forEach((dataset) => {
         dataset.data.shift();
     });
-    chart.update();}
+    chart.update();
+}
 
-// OU Network Computation
-/////////////////////////
+//------------ OU Network Computation ------------//
 
 // Ou Network value updates
 function ouNetwork() {
@@ -335,6 +649,7 @@ function ouNetwork() {
             var new_value = ouIncrement(var_name, mean_attractor); // ouIncrement(old_value, sigma, dt, theta, mean_attractor);
         }
 
+        // No values above 100 or below -100
         if (new_value > 100) {
             new_value = 100;
         } else if (new_value < -100) {
@@ -347,7 +662,7 @@ function ouNetwork() {
 // Helper: Compute attractor value 
 function attractor(variable_name, causes) {
     var coefs = causes[variable_name];
-    var last_step = count - 1
+    var last_step = count - 1; 
 
     // Compute x,y,z attractor values
     var x_att = xHist[last_step]*coefs[0];
@@ -408,13 +723,23 @@ function record(x, y, z) {
 
 
 
+// ---------------- HELPER FUNCTIONS ---------------- //
+
+// Function to randomise experimental conditions 
+function ex_randomiser(my_order){
+    var shuffledArray = my_order.slice(); // Clone the array
+
+    // Shuffle the cloned array using the Fisher-Yates algorithm
+    for (var i = shuffledArray.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var temp = shuffledArray[i];
+    shuffledArray[i] = shuffledArray[j];
+    shuffledArray[j] = temp;
+    }
+    return shuffledArray
+}
 
 
-
-
-
-
-// Math stuff
 
 // --- Normal distribution and math functions --- //
 // https://gist.github.com/bluesmoon/7925696
