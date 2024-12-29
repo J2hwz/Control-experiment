@@ -1,13 +1,14 @@
 // TODO
 // Add instructions 
 // Differentiate between training and testing rounds 
-// Deduct scores for interventions 
 // CSS styling
+// Decide how to make control more difficult: By manipulating connection strength or amount of noise added
 
 
 // Trial variables
 var n_trials = 6;
 var order_all = [1,2,3,4,5,6]; 
+var n_interventions = 0
 
 // Counterbalance variables
 var counter_balance = ["A", "B"];
@@ -19,7 +20,8 @@ var conditions = ["P", "Q", "R", "S"];
 // Task variables
 var time_step = 1000; // 4000 ms per step in the experiment
 var timeout = 20; // Maximum number of steps per trial
-var score = 0; // Total Score (successful control)
+var trial_score = 0; // Score for each trial (successful control)
+var total_score = 15; // Start with 15 so they can make at least 10 interventions
 
 
 // Slider variables
@@ -42,7 +44,7 @@ var yHist = [0]; // List of values Y (int)
 var zHist = [0]; // List of values Z (int)
                         
 var sigma = 5; // Amount of noise added to system                     
-var theta = .7; // How strong the connections are 
+var theta = .5; // How strong the connections are 
 var causes = {
     'x': [0,0,0],
     'y': [0,0,0],
@@ -151,7 +153,8 @@ function goto_task() {
     // Set up Experimental Conditions
     trial = order[trial_count]; // Call the first causal graph condition 
     load_graph(trial); // Load the assigned condition
-
+    // load_graph(1) // To set specific trial to be loaded
+    
     // $("#condition_display").html("Round: " + (condition_count+1) + "/" + n_conditions);
 }
 
@@ -160,6 +163,10 @@ function goto_score() {
     $('#instructions').hide();
     $('#experiment-trial').hide();
     $('#trial_score').show();
+
+    // Calculate total score and change display
+    total_score = total_score + trial_score - n_interventions; 
+    $("#total_score_display").html("<b>Total score: " + total_score + "</b>");
 }
 
 // Initial setup of the experimental task
@@ -278,6 +285,9 @@ function update_model(preset) {
     // };
 }
 
+
+// --------------- Setup trials functions --------------- //
+
 function setup_condition(){
     condition = conditions[Math.floor(Math.random() * conditions.length)];
 
@@ -286,17 +296,19 @@ function setup_condition(){
 
     } else if (condition == "Q"){
         // Low reward saliency, low control
-        theta = .3
+        // theta = .3 
+        sigma = 2;
     } else if (condition == "R"){
         // High reward saliency, high control
         reward_width = 20;
     } else {
         // High reward saliency, low control
         reward_width = 20;
-        theta = .3
+        // theta = .3
+        sigma = 2;
     }
 
-    console.log(condition, theta, reward_width);
+    console.log(condition, theta, reward_width, sigma);
 }
 
 
@@ -496,50 +508,18 @@ function setup_interface() {
     $('#next_trial_button').click(function() {
         $('#next_trial_button').hide();
 
-        //Initialise New Condition
+        //Initialise New Condition or move on
         if (trial_count < (n_trials - 1)){
-            // $('.likert-scale input[type="radio"]').prop('checked', false);
-            $('#experiment-trial').show();
-            $('#trial_score').hide();
-            $('#view_score_button').hide();
-
-            //------ Reset Task Interface -----//
-            
-            // Stopping the unique interval ID
-            clearInterval(interval);
-
-            // Reseting the slider values back to 0
-            $('.slider').slider("value", 0);
-
-            // Reseting array of x, y, & z values 
-            xHist = [0];  
-            yHist = [0]; 
-            zHist = [0];             
-
-            // Prompting participant
-            alert('You will now move to round ' + (trial_count + 2) +' of ' + n_trials + '. Remember, the connection between the sliders may be different this time.');
-            
-            $('#start_button').show();
-
-            trial_count += 1;
-            
-            // Loading in causal graph of next trial
-            trial = order[trial_count];
-            load_graph(trial);
-
-            $("#trial_display").html("Training Round " + (trial_count + 1));
-            $("#trial_display_score").html("Training Round " + (trial_count + 1));
-            $("#countdown-display").html("Steps: 0/" + timeout);
-            // $("#score_display").html("<b><font color=#D4AF37>Bonus Pay: £"+bonus+"</font></b>");
-        } else{
+            initialise_next_trial();
+        } else {
             // $('#next_rnd_btn').hide();
             // alert('You have completed the tasks! Press "Continue" to move to the debrief section.')
             // $('#task_cont_btn').show();
         }
     });
-
-
 }
+
+
 
 // Main game loop
 function step() {
@@ -567,10 +547,16 @@ function step() {
             $("#countdown-display").html("<i>Steps: " + count  + "/" + timeout + "</i>");
         }
 
+        // Update amount of interventions 
+        if (xclicked == true || yclicked == true) {
+            n_interventions++;
+            $("#intervention_display").html("<b>Cost: " + n_interventions + "</b>");
+        }
+
         // Visualise score (increase if target in range)
         var reward = false;
         if (z <= (reward_centre + reward_width) && z >= (reward_centre - reward_width)) {       
-            score++;
+            trial_score += 3; // Score three points for getting z in the reward region
             reward = true;
 
             // if (bonus < 1.48) {
@@ -578,7 +564,7 @@ function step() {
             // } else {
             //     bonus = (1.50).toFixed(2);
             // };
-            $("#score-display").html("<b>Score: " + score + "</b>");
+            $("#trial_score_display").html("<b>Points scored in previous round: " + trial_score + "</b>");
         }
         
         // Record whether participant had the tab open or closed
@@ -718,7 +704,52 @@ function record(x, y, z) {
     // trial_data.has_focus.push(focus);
 }
 
+// Reset variables for next trial 
 
+function initialise_next_trial() {
+    // $('.likert-scale input[type="radio"]').prop('checked', false);
+    $('#experiment-trial').show();
+    $('#trial_score').hide();
+    $('#view_score_button').hide();
+
+    //------ Reset Task Interface -----//
+    
+    // Stopping the unique interval ID
+    clearInterval(interval);
+
+    // Reseting the slider values back to 0
+    $('.slider').slider("value", 0);
+
+    // Reseting array of x, y, & z values 
+    xHist = [0];  
+    yHist = [0]; 
+    zHist = [0];
+    
+    // Reset scores and number of interventions for previous trial
+    trial_score = 0; 
+    n_interventions = 0;  
+    $("#trial_score_display").html("<b>Points scored: 0</b>");
+    $("#intervention_display").html("<b>Cost: 0</b>");
+
+    // console.log(trial_score, n_interventions);    
+
+    // Prompting participant
+    alert('You will now move to round ' + (trial_count + 2) +' of ' + n_trials + '. Remember, the connection between the sliders may be different this time.');
+    
+    $('#start_button').show();
+
+    trial_count += 1;
+    
+    // Loading in causal graph of next trial
+    trial = order[trial_count];
+    load_graph(trial);
+    // load_graph(1) // To set specific trial to be loaded for testing 
+
+    $("#trial_display").html("Training Round " + (trial_count + 1));
+    $("#trial_display_score").html("Training Round " + (trial_count + 1));
+    $("#countdown-display").html("Steps: 0/" + timeout);
+    // $("#score_display").html("<b><font color=#D4AF37>Bonus Pay: £"+bonus+"</font></b>");
+}
 
 
 
