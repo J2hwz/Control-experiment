@@ -1,6 +1,7 @@
 // TODO
 // Add instructions 
 // Differentiate between training and testing rounds 
+// Maybe remove larger circle when z variable is in reward region
 // CSS styling
 // Decide how to make control more difficult: By manipulating connection strength or amount of noise added
 
@@ -18,10 +19,10 @@ var counter_balance_order = [];
 var conditions = ["P", "Q", "R", "S"];
 
 // Task variables
-var time_step = 1000; // 4000 ms per step in the experiment
-var timeout = 20; // Maximum number of steps per trial
+var time_step = 4000; // 4000 ms per step in the experiment
+var timeout = 40; // Maximum number of steps per trial
 var trial_score = 0; // Score for each trial (successful control)
-var total_score = 15; // Start with 15 so they can make at least 10 interventions
+var total_score = 10; // Start with 10 so they can make at least 10 interventions without going into the negative
 
 
 // Slider variables
@@ -179,7 +180,7 @@ function setup_task() {
     order = ex_randomiser(order_all);
 
     // Hide slider Z that participants shouldn't control
-    $("#slider-z").hide();  
+    // $("#slider-z").hide();  
 
     // Randomly choose condition and setup
     setup_condition();
