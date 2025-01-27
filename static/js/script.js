@@ -19,7 +19,7 @@ var counter_balance_order = [];
 var conditions = ["P", "Q", "R", "S"];
 
 // Task variables
-var time_step = 4000; // 4000 ms per step in the experiment
+var time_step = 2000; 
 var timeout = 40; // Maximum number of steps per trial
 var trial_score = 0; // Score for each trial (successful control)
 var total_score = 10; // Start with 10 so they can make at least 10 interventions without going into the negative
@@ -156,6 +156,9 @@ function goto_task() {
     load_graph(trial); // Load the assigned condition
     // load_graph(1) // To set specific trial to be loaded
     
+    // Update score display
+    $("#step_score_display").html("<b>Score: " + total_score + "</b>");
+
     // $("#condition_display").html("Round: " + (condition_count+1) + "/" + n_conditions);
 }
 
@@ -166,7 +169,6 @@ function goto_score() {
     $('#trial_score').show();
 
     // Calculate total score and change display
-    total_score = total_score + trial_score - n_interventions; 
     $("#total_score_display").html("<b>Total score: " + total_score + "</b>");
 }
 
@@ -187,6 +189,9 @@ function setup_task() {
 
     // Setup slider positions 
     set_sliders();
+
+    // Setup reward area on slider Z
+    set_reward_area();
 
     // Setup chart and variables 
     setup_chart();
@@ -380,6 +385,24 @@ function set_sliders() {
     }));
 }
 
+// Setup reward region on slider (Taken from Btesh's Dynamic Control Example)
+function set_reward_area() {
+    // $('#reward-area').remove()
+    // $('#reward-counter-handle').remove()
+
+    var rewardArea = $('<div id="reward-area" class="ui-slider-range ui-corner-all ui-widget-header"></div>')
+    // var rewardHandle = $('<span id="reward-counter-handle" class="reward-counter" style="font-family: Arial, Helvetica, sans-serif;">0</span>')
+    rewardArea.css({
+        "bottom": `${(reward_centre - reward_width + 100) * 0.5}%`,
+        "height": `${reward_width}%`,
+        // "bottom": `50%`,
+        // "height": `20%`, 
+        "background-color": `black`
+    })
+    $(`#custom-handle-z`).after(rewardArea)
+    // $(`#custom-handle-${variableIdx}`).html(rewardHandle)
+}
+
 function setup_chart() {
     var canvas_html = "<canvas id='progress-chart'></canvas>";
     $(".chart-container").html(canvas_html); // Replacing the chart-container div with a chart from chart.js
@@ -543,21 +566,20 @@ function step() {
             removeData(chart);
         }
 
-        // Visualise countdown
-        if ((timeout - count) % (1000/time_step) === 0) {
-            $("#countdown-display").html("<i>Steps: " + count  + "/" + timeout + "</i>");
-        }
-
         // Update amount of interventions 
         if (xclicked == true || yclicked == true) {
-            n_interventions++;
-            $("#intervention_display").html("<b>Cost: " + n_interventions + "</b>");
+            total_score--; // Deduct total score by 1 for each intervention 
+            n_interventions++; // Add 1 to number of interventions for this trial
+
+            $("#intervention_display").html("<b>You moved the sliders " + n_interventions + " times.</b>");
         }
 
         // Visualise score (increase if target in range)
         var reward = false;
         if (z <= (reward_centre + reward_width) && z >= (reward_centre - reward_width)) {       
-            trial_score += 3; // Score three points for getting z in the reward region
+            total_score += 3; // Add 3 points to total score
+            trial_score += 3; // Keep track of amount scored during this trial
+             
             reward = true;
 
             // if (bonus < 1.48) {
@@ -566,6 +588,13 @@ function step() {
             //     bonus = (1.50).toFixed(2);
             // };
             $("#trial_score_display").html("<b>Points scored in previous round: " + trial_score + "</b>");
+        }
+
+        // Visualise countdown
+        if ((timeout - count) % (1000/time_step) === 0) { // Original Code
+            // if (count <= timeout) {
+            $("#step_score_display").html("<b>Score: " + total_score + "</b>");
+            $("#step_countdown_display").html("<i>Steps: " + count  + "/" + timeout + "</i>");
         }
         
         // Record whether participant had the tab open or closed
@@ -729,8 +758,11 @@ function initialise_next_trial() {
     // Reset scores and number of interventions for previous trial
     trial_score = 0; 
     n_interventions = 0;  
-    $("#trial_score_display").html("<b>Points scored: 0</b>");
-    $("#intervention_display").html("<b>Cost: 0</b>");
+    $("#trial_score_display").html("<b>Points scored in previous round: 0</b>");
+    $("#intervention_display").html("<b>You moved the sliders 0 times.</b>");
+
+    // Update step score to reflect total score currently 
+    $("#step_score_display").html("<b>Score: " + total_score + "</b>");
 
     // console.log(trial_score, n_interventions);    
 
@@ -748,7 +780,7 @@ function initialise_next_trial() {
 
     $("#trial_display").html("Training Round " + (trial_count + 1));
     $("#trial_display_score").html("Training Round " + (trial_count + 1));
-    $("#countdown-display").html("Steps: 0/" + timeout);
+    $("#step_countdown_display").html("Steps: 0/" + timeout);
     // $("#score_display").html("<b><font color=#D4AF37>Bonus Pay: £"+bonus+"</font></b>");
 }
 

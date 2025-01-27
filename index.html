@@ -131,8 +131,8 @@
         <!-- Header -->
         <div id="task-header">
             <h1 id="trial_display">Training Round 1</h1>
-            <!-- <p style="text-align: center" id="score-display"><b>Score: 0</b></p> -->
-            <p style="text-align: center" id="countdown-display"><i>Steps: 0/40</i></p>
+            <p style="text-align: center" id="step_score_display"><b>Score: 0</b></p>
+            <p style="text-align: center" id="step_countdown_display"><i>Steps: 0/40</i></p>
         </div>
 
         <div class="task-display">
@@ -142,7 +142,9 @@
 
             <div class="slider-container">
                 <div class="slider-box" id="slider-sub-container-x">
-                    <div class="slider" id="slider-x"></div>
+                    <div class="slider" id="slider-x">
+                        <!-- <div class="slider-handle" id="custom-handle-3" ></div> -->
+                    </div>
                 </div>
 
                 <div class="slider-box" id="slider-sub-container-y">
@@ -150,7 +152,9 @@
                 </div>
 
                 <div class="slider-box" id="slider-sub-container-z">
-                    <div class="slider" id="slider-z"></div>
+                    <div class="slider" id="slider-z">
+                        <div class="slider-handle" id="custom-handle-z" ></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -165,10 +169,9 @@
     <div id="trial_score">
         <div id="task-header">
             <h1 id="trial_display_score">Training Round 1</h1>
-            <p style="text-align: center" id="trial_score_display"><b>Points scored: 0</b></p>
-            <p style="text-align: center; color: red;" id="intervention_display"><b>Cost: 0</b></p>
+            <p style="text-align: center" id="trial_score_display"><b>Points scored in previous round: 0</b></p>
+            <p style="text-align: center; color: red;" id="intervention_display"><b>You moved the sliders 0 times.</b></p>
             <p style="text-align: center; color: gold; font-size: 30px;" id="total_score_display"><b>Total score: 0</b></p>
-            <!-- <p style="text-align: center" id="countdown-display"><i>Steps: 0/40</i></p> -->
         </div>
         <div class='slide' align=center>
 			<button id='next_trial_button'>Next Trial</button>
