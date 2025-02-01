@@ -143,17 +143,21 @@
             <div class="slider-container">
                 <div class="slider-box" id="slider-sub-container-x">
                     <div class="slider" id="slider-x">
-                        <!-- <div class="slider-handle" id="custom-handle-3" ></div> -->
+                        <div id="slider-handle-x" class="ui-slider-handle">X</div>
                     </div>
                 </div>
 
                 <div class="slider-box" id="slider-sub-container-y">
-                    <div class="slider" id="slider-y"></div>
+                    <div class="slider" id="slider-y">
+                        <div id="slider-handle-y" class="ui-slider-handle">Y</div>
+                    </div>
                 </div>
+                
+                <div class="slider-blank-space"></div>
 
                 <div class="slider-box" id="slider-sub-container-z">
                     <div class="slider" id="slider-z">
-                        <div class="slider-handle" id="custom-handle-z" ></div>
+                        <div id="slider-handle-z" class="ui-slider-handle">Z</div>
                     </div>
                 </div>
             </div>
@@ -173,10 +177,39 @@
             <p style="text-align: center; color: red;" id="intervention_display"><b>You moved the sliders 0 times.</b></p>
             <p style="text-align: center; color: gold; font-size: 30px;" id="total_score_display"><b>Total score: 0</b></p>
         </div>
+
+        <div id="causal_query_container">
+            <h1>Pick the most likely relationship from the previous trial</h1>
+        
+            <div class="image_container">
+              <!-- Each image has an onclick event to select it -->
+              <img src="./static/assets/images/structure1.png" id="img1" class="query_img" onclick="select_structure(1)">
+              <img src="./static/assets/images/structure2.png" id="img2" class="query_img" onclick="select_structure(2)">
+              <img src="./static/assets/images/structure3.png" id="img3" class="query_img" onclick="select_structure(3)">
+              <img src="./static/assets/images/structure4.png" id="img4" class="query_img" onclick="select_structure(4)">
+              <img src="./static/assets/images/structure5.png" id="img5" class="query_img" onclick="select_structure(5)">
+              <img src="./static/assets/images/structure6.png" id="img6" class="query_img" onclick="select_structure(6)">
+            </div>
+        
+            <!-- Options for "Regular" and "Inverse" relationships -->
+            <div class="options">
+              <!-- Radio button for "Regular" -->
+              <input type="radio" id="regular" name="relationship" value="regular" disabled>
+              <label for="regular">Regular</label>
+        
+              <!-- Radio button for "Inverse" -->
+              <input type="radio" id="inverse" name="relationship" value="inverse" disabled>
+              <label for="inverse">Inverse</label>
+        </div>
+
         <div class='slide' align=center>
 			<button id='next_trial_button'>Next Trial</button>
 		</div>
+
+
     </div>
+
+    
 
 </body>
 

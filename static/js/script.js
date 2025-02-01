@@ -19,7 +19,7 @@ var counter_balance_order = [];
 var conditions = ["P", "Q", "R", "S"];
 
 // Task variables
-var time_step = 2000; 
+var time_step = 100; 
 var timeout = 40; // Maximum number of steps per trial
 var trial_score = 0; // Score for each trial (successful control)
 var total_score = 10; // Start with 10 so they can make at least 10 interventions without going into the negative
@@ -36,7 +36,7 @@ var z = 0;
 // Chart variables
 var reward_centre = 50; // Centre of shaded reward region
 var reward_width = 10; // 1/2 width of shaded reward region
-// var rShade = 'rgb(212, 175, 55, .5)';
+var shade_colour = 'rgb(157, 212, 55, .5)';
 var n_datapoints = 15; // Maximum number of datapoints to be plotted
 
 // OU network variables 
@@ -51,6 +51,10 @@ var causes = {
     'y': [0,0,0],
     'z': [0,0,0]
 }
+
+// Causal Query variables
+var selected_structure = null; // To track selected structure for each trial
+
 
 // Causal graph presets
 var presets = {
@@ -379,10 +383,19 @@ function set_sliders() {
         create: function(event, ui) {
             $("#slider-z").slider("value", z);
         },
+        
+        slide: function(event, ui) {
+            return false; // Make it so that participants can't interact with slider Z
+        },
+
         change: function(event, ui) {
             z = parseInt($('#slider-z').slider("value"));
-        }
+        },
     }));
+
+    $("#slider-z").slider({
+        range: false
+    })
 }
 
 // Setup reward region on slider (Taken from Btesh's Dynamic Control Example)
@@ -397,9 +410,9 @@ function set_reward_area() {
         "height": `${reward_width}%`,
         // "bottom": `50%`,
         // "height": `20%`, 
-        "background-color": `black`
+        "background-color": shade_colour,
     })
-    $(`#custom-handle-z`).after(rewardArea)
+    $(`#slider-handle-z`).after(rewardArea)
     // $(`#custom-handle-${variableIdx}`).html(rewardHandle)
 }
 
@@ -423,13 +436,21 @@ function setup_chart() {
                 label: "X", // X datapoints
                 data: [0],
                 tension: 0, // Disable line smoothing
-                pointRadius: 3
+                pointRadius: 4,
+                borderColor: 'rgb(140, 140, 255)',
+                backgroundColor: 'rgb(140, 140, 255)',
+                pointBackgroundColor: 'rgb(0, 0, 255)',
+                fill: false
             },
             {
                 label: "Y", // Y datapoints
                 data: [0],
                 tension: 0, // Disable line smoothing
-                pointRadius: 3
+                pointRadius: 4,
+                borderColor: 'rgb(255, 140, 140)',
+                backgroundColor: 'rgb(255, 140, 140)',
+                pointBackgroundColor: 'rgb(255, 0, 0)',
+                fill: false
             },
             {
                 label: "Z", // Z datapoints
@@ -444,9 +465,13 @@ function setup_chart() {
                     if (value >= rew_min && value <= rew_max) {
                         return 7; // Bigger radius for points inside shaded range
                     } else {
-                        return 3; // Same point radius as X or Y otherwise
+                        return 4; // Same point radius as X or Y otherwise
                     }
                 },
+                borderColor: 'rgb(151, 240, 151)',
+                backgroundColor: 'rgb(151, 240, 151)',
+                pointBackgroundColor: 'rgb(30, 174, 30)',
+                fill: false
             }
         ]
         },
@@ -475,7 +500,7 @@ function setup_chart() {
                             yMin: reward_centre - reward_width,
                             yMax: reward_centre + reward_width,
                             borderWidth: 0,
-                            backgroundColor: 'rgba(255, 99, 132, 0.25)'
+                            backgroundColor: shade_colour,
                         }
                     }
                 }
@@ -509,6 +534,7 @@ function setup_interface() {
         $('#start_button').hide();
         $('#slider-x').slider('enable');
         $('#slider-y').slider('enable');
+        $('#slider-z').slider('enable');
 
         count = 0;
 
@@ -542,8 +568,6 @@ function setup_interface() {
         }
     });
 }
-
-
 
 // Main game loop
 function step() {
@@ -734,6 +758,27 @@ function record(x, y, z) {
     // trial_data.has_focus.push(focus);
 }
 
+
+
+// Function to handle image selection
+function select_structure(imageId) {
+  // Clear all image selections
+  const images = document.querySelectorAll('.image_container img');
+  images.forEach(img => img.classList.remove('selected'));
+
+  // Highlight the newly selected image
+  selectedImage = imageId;
+  document.getElementById(`img${imageId}`).classList.add('selected');
+
+  // Enable the radio buttons
+  document.getElementById('regular').disabled = false;
+  document.getElementById('inverse').disabled = false;
+
+  // Clear previous radio button selection (if any)
+  document.querySelectorAll('input[name="relationship"]').forEach(input => input.checked = false);
+}
+
+
 // Reset variables for next trial 
 
 function initialise_next_trial() {
@@ -766,9 +811,6 @@ function initialise_next_trial() {
 
     // console.log(trial_score, n_interventions);    
 
-    // Prompting participant
-    alert('You will now move to round ' + (trial_count + 2) +' of ' + n_trials + '. Remember, the connection between the sliders may be different this time.');
-    
     $('#start_button').show();
 
     trial_count += 1;
@@ -778,8 +820,21 @@ function initialise_next_trial() {
     load_graph(trial);
     // load_graph(1) // To set specific trial to be loaded for testing 
 
-    $("#trial_display").html("Training Round " + (trial_count + 1));
-    $("#trial_display_score").html("Training Round " + (trial_count + 1));
+    // Differentiate between training and trial rounds
+    if (trial_count >= 0 && trial_count < 3) {
+        $("#trial_display").html("Training Round " + (trial_count + 1));
+        $("#trial_display_score").html("Training Round " + (trial_count + 1));
+
+        // Prompting participant
+        alert('You will now move to training round ' + (trial_count + 1) +' of 3. Remember, the connection between the sliders may be different this time.');
+    } else if (trial_count >= 3 && trial_count < 6) {
+        $("#trial_display").html("Test Round " + (trial_count - 2));
+        $("#trial_display_score").html("Test Round " + (trial_count - 2));
+
+        // Prompting participant
+        alert('You will now move to test round ' + (trial_count - 2) +' of 3. Remember, the connection between the sliders may be different this time.');
+    }
+
     $("#step_countdown_display").html("Steps: 0/" + timeout);
     // $("#score_display").html("<b><font color=#D4AF37>Bonus Pay: £"+bonus+"</font></b>");
 }
