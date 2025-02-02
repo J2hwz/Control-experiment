@@ -34,6 +34,8 @@
     <!-- Instructions -->
     <div id="instructions">
         <div align=center><button id = "straight_to_task"><b>Go straight to task</b></button></div>
+        <div align=center><button id = "straight_to_demographics"><b>Go straight to demographics</b></button></div>
+
         <div id="ins_1" class="slide">
 			<img src="./static/assets/images/PPLS.png" alt="ex1" style="float: right; width: 400px;">
 			<br /><br />
@@ -47,26 +49,28 @@
             
             <p>
                 <b>What is this document?</b> 
-                This document explains what kind of study we’re doing, outlines your rights, and details the handling of your data. 
-                We recommend printing this page for your records.
+                This document explains what kind of study we’re doing, what your rights are, and what will be done with your data. You should print this page for your records.
             </p>
             
             <p>
                 <b>Nature of the study.</b> 
-                You are invited to participate in a study which involves interacting with simple sliders on your screen and answering questions about your observations. Your interactions with the sliders and responses will be recorded. 
-                Your session should last for ? to ? minutes. 
+                You are invited to participate in a study which involves interacting with simple sliders on your screen and answering questions about your observations. 
+                Your performance on the tasks and responses to questionnaire items will recorded. 
+                Once you finish, we may have some questions about you (e.g., age, gender). 
+                Your session should last for up to 20 minutes. 
                 You will be given full instructions shortly.
             </p>
             
             <p>
                 <b>Compensation.</b> 
-                For your participation in this study, you will be paid a base rate of £? and a bonus of up to £? depending on your performance. 
+                You will not receive any monetary compensation for your participation in this study. 
+                If you are participant from SONA, you may be eligible for course credits. 
             </p>
             
             <p>
                 <b>Risks and benefits.</b> 
                 There are no known risks to participation in this study. 
-                Other than the payment mentioned, there are no tangible benefits to you, however you will be contributing to our knowledge about causal learning.
+                There are no tangible benefits to you, however you will be contributing to our knowledge about causal cognition.
             </p>
             
             <p>
@@ -111,7 +115,7 @@
             </p>
 
 			<br />
-			<p><span>Please enter your Prolific ID:</span></p>
+			<!-- <p><span>Please enter your Prolific ID:</span></p> -->
 			<br />
 			<div style="text-align: center;">
 				<input type="text" class = "get_proid" name="proid" id="proid" size="50">
@@ -124,7 +128,6 @@
 
 		</div>
     </div>
-
 
     <!-- Experimental task -->
     <div id="experiment-trial">
@@ -169,7 +172,7 @@
 		</div>
     </div>
 
-    <!-- Task Score -->
+    <!-- Trial score and causal query question -->
     <div id="trial_score">
         <div id="task-header">
             <h1 id="trial_display_score">Training Round 1</h1>
@@ -200,16 +203,164 @@
               <!-- Radio button for "Inverse" -->
               <input type="radio" id="inverse" name="relationship" value="inverse" disabled>
               <label for="inverse">Inverse</label>
+            </div>
         </div>
 
         <div class='slide' align=center>
 			<button id='next_trial_button'>Next Trial</button>
 		</div>
-
-
     </div>
 
-    
+    <!-- Demographics and debrief -->
+    <div id="demographics_debrief">
+		<div id="deb_1" class="slide">
+			<h1>Demographics and Debrief</h1>
+			<br/><br/>
+			<p>You are finished! Thank you for your contribution to the study. You will be eligible for full payment once you answer the following questions.</p>
+			<br/><br/>
+
+			<div class="row question">
+				<div class="col-md-1"><p><b>1.</b></p></div>
+				<div class="col-md-7">
+					<p>How old are you?</p>
+				</div>
+				<div class="col-md-4">
+					<input id="age" class="posttestQ" type="number" maxlength = "3" name="age" id="age" min="1" max="100" step = "1" required>
+				</div>
+			</div>
+			<br/><br/>
+
+			<div class="row question">
+				<div class="col-md-1"><p><b>2.</b></p></div>
+				<div class="col-md-7">
+					<p>What is your gender?</p>
+				</div>
+				<div class="col-md-4">
+					<select id="sex" name="sex" class="posttestQ">
+						<option value="noresp" SELECTED></option>
+						<option value="female">Female</option>
+						<option value="male">Male</option>
+						<option value="other">Non-binary / Other</option>
+						<option value="noresponse">Prefer not to say</option>
+					</select>
+				</div>
+			</div>
+			<br/><br/>
+
+			<div class="row question">
+				<div class="col-md-1"><p><b>3.</b></p></div>
+				<div class="col-md-7">
+					<p>On a scale of 1-10 (where 10 is the most engaged), please rate how <b>ENGAGING</b> you found the task:</p>
+				</div>
+				<div class="col-md-4">
+					<select id="engagement" name="engagement" class="posttestQ">
+						<option value="--" SELECTED>
+							<option value="10">10 - Very engaging</option>
+							<option value="9">9</option>
+							<option value="8">8</option>
+							<option value="7">7</option>
+							<option value="6">6</option>
+							<option value="5">5 - Moderately</option>
+							<option value="4">4</option>
+							<option value="3">3</option>
+							<option value="2">2</option>
+							<option value="1">1</option>
+							<option value="0">0 - Not engaged</option>
+					</select>
+				</div>
+			</div>
+			<br/><br/>
+
+			<div class="row question">
+				<div class="col-md-1"><p><b>4.</b></p></div>
+				<div class="col-md-7">
+					<p>On a scale of 1-10 (where 10 is the most difficult), please rate how <b>DIFFICULT</b> you found the task:</p>
+				</div>
+				<div class="col-md-4">
+					<select id="difficulty" name="difficulty" class="posttestQ">
+						<option value="--" SELECTED>
+							<option value="10">10 - Very difficult</option>
+							<option value="9">9</option>
+							<option value="8">8</option>
+							<option value="7">7</option>
+							<option value="6">6</option>
+							<option value="5">5 - Moderately difficult</option>
+							<option value="4">4</option>
+							<option value="3">3</option>
+							<option value="2">2</option>
+							<option value="1">1</option>
+							<option value="0">0 - Not difficult at all</option>
+					</select>
+				</div>
+			</div>
+			<br/><br/>
+
+            <div class="row question">
+				<div class="col-md-1"><p><b>5.</b></p></div>
+				<div class="col-md-7">
+					<p>Did you use a trackpad or mouse when completing the study?</p>
+				</div>
+				<div class="col-md-4">
+					<select id="mouse_trackpad" name="mouse_trackpad" class="posttestQ">
+						<option value="noresp" SELECTED></option>
+						<option value="trackpad">Trackpad</option>
+						<option value="Mouse">Mouse</option>
+						<option value="other">Other</option>
+					</select>
+				</div>
+			</div>
+			<br/><br/>
+
+			<div class="row question">
+			  	<div class="col-md-12">
+			    	<p><b>6.</b> Which strategy did you use to solve the tasks? Did your strategy change over the course of this experiment? Please, be specific.</p>
+			  	</div>
+			  	<div class="col-md-12">
+			    	<textarea id="answer1" name="answer1" class="posttestQ" maxlength="800" name="answer" rows="4" cols="50"></textarea>
+			  	</div>
+			</div>
+			<br/><br/>
+
+			<div class="row question">
+			  	<div class="col-md-12">
+			    	<p><b>7.</b> Did you discover any bugs in this experiment? If so, please provide a short description of the bug(s).</p>
+			  	</div>
+			  	<div class="col-md-12">
+			    	<textarea id="answer2" name="answer2" class="posttestQ" maxlength="400" name="answer" rows="4"></textarea>
+			  	</div>
+			</div>
+
+            <div class="row question">
+				<div class="col-md-1"><p><b>8.</b></p></div>
+				<div class="col-md-7">
+					<p>
+                        Finally, please be <b>honest</b> when answering the following question. 
+                        Your answer will <b>not</b> affect your course credits or eleigbility for future studies.
+                        <b>Do you feel that you paid attention, avoided distractions, and took this experiment seriously?</b>
+                    </p>
+				</div>
+				<div class="col-md-4">
+					<select id="concentration" name="concentration" class="posttestQ">
+						<option value="noresp" SELECTED></option>
+						<option value="distracted">No, I was distracted</option>
+						<option value="trouble">No, I had trouble paying attention</option>
+						<option value="notserious">No, I did not take this survey seriously</option>
+                        <option value="somethingelse">No, something else affected my participation negatively</option>
+                        <option value="yes">Yes</option>
+					</select>
+				</div>
+			</div>
+			<br/><br/>
+
+			<br/>
+			<h3> To continue, please answer <span style="color:red">all questions</span>.</h3>
+			<br/>
+			<div align=center>
+				<button id="done_debrief"  class="btn-primary btn-lg"><b>Done</b></button>
+			</div>
+			<br/>
+		</div>
+	</div>
 
 </body>
 

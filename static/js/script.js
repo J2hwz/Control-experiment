@@ -1,10 +1,8 @@
-// TODO
-// Add instructions 
-// Differentiate between training and testing rounds 
-// Maybe remove larger circle when z variable is in reward region
-// CSS styling
-// Decide how to make control more difficult: By manipulating connection strength or amount of noise added
+//------------------------ Variables ------------------------//
 
+// Participant data
+var subject_data = [];
+var trial_data = {};
 
 // Trial variables
 var n_trials = 6;
@@ -139,11 +137,19 @@ function start() {
     $('#instructions').show();
     $('#experiment-trial').hide();
     $('#trial_score').hide();
+    $('#demographics_debrief').hide();
+    
 
     // Buttons for testing (skip explanations)
     $('#straight_to_task').click(function () { 
         console.log('STARTING TASK');   
         goto_task();
+    }); 
+
+    // Buttons for testing (go to end)
+    $('#straight_to_demographics').click(function () { 
+        console.log('Demographics');   
+        goto_demographics();
     }); 
 
     setup_task();
@@ -154,6 +160,7 @@ function goto_task() {
     $('#instructions').hide();
     $('#experiment-trial').show();
     $('#trial_score').hide();
+    $('#demographics_debrief').hide();
 
     // Set up Experimental Conditions
     trial = order[trial_count]; // Call the first causal graph condition 
@@ -165,6 +172,15 @@ function goto_task() {
 
     // $("#condition_display").html("Round: " + (condition_count+1) + "/" + n_conditions);
 }
+
+// Go to demographics
+function goto_demographics() {
+    $('#instructions').hide();
+    $('#experiment-trial').hide();
+    $('#trial_score').hide();
+    $('#demographics_debrief').show();
+}
+
 
 // Go to score slide after each trial
 function goto_score() {
@@ -476,7 +492,9 @@ function setup_chart() {
         ]
         },
 
-        options: {   
+        options: {  
+            responsive: true,
+            maintainAspectRatio: false, 
             scales: {
                 x: {
                     title: {
@@ -580,6 +598,8 @@ function step() {
 
         // Step of OU process
         ouNetwork();
+
+        // Step in trial for data recording purposes 
         var new_step = count;
         
         // Visualise data on chart  
@@ -606,11 +626,6 @@ function step() {
              
             reward = true;
 
-            // if (bonus < 1.48) {
-            //     bonus = (2* score * bonus_pay / (n_conditions * timeout)).toFixed(2);
-            // } else {
-            //     bonus = (1.50).toFixed(2);
-            // };
             $("#trial_score_display").html("<b>Points scored in previous round: " + trial_score + "</b>");
         }
 
