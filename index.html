@@ -216,7 +216,7 @@
 		<div id="deb_1" class="slide">
 			<h1>Demographics and Debrief</h1>
 			<br/><br/>
-			<p>You are finished! Thank you for your contribution to the study. You will be eligible for full payment once you answer the following questions.</p>
+			<p>You have completed the main task! Please answer the following questions to finish the study.</p>
 			<br/><br/>
 
 			<div class="row question">
@@ -247,25 +247,25 @@
 			</div>
 			<br/><br/>
 
-			<div class="row question">
+            <div class="row question">
 				<div class="col-md-1"><p><b>3.</b></p></div>
 				<div class="col-md-7">
-					<p>On a scale of 1-10 (where 10 is the most engaged), please rate how <b>ENGAGING</b> you found the task:</p>
+					<p>On a scale of 1-10 (where 10 is complete control), please rate how much <b>CONTROL</b> you had over the system across all rounds:</p>
 				</div>
 				<div class="col-md-4">
-					<select id="engagement" name="engagement" class="posttestQ">
+					<select id="control" name="control" class="posttestQ">
 						<option value="--" SELECTED>
-							<option value="10">10 - Very engaging</option>
-							<option value="9">9</option>
-							<option value="8">8</option>
-							<option value="7">7</option>
-							<option value="6">6</option>
-							<option value="5">5 - Moderately</option>
-							<option value="4">4</option>
-							<option value="3">3</option>
-							<option value="2">2</option>
-							<option value="1">1</option>
-							<option value="0">0 - Not engaged</option>
+                        <option value="10">10 - Complete control</option>
+                        <option value="9">9</option>
+                        <option value="8">8</option>
+                        <option value="7">7</option>
+                        <option value="6">6</option>
+                        <option value="5">5 - Moderate control</option>
+                        <option value="4">4</option>
+                        <option value="3">3</option>
+                        <option value="2">2</option>
+                        <option value="1">1</option>
+                        <option value="0">0 - No control at all</option>
 					</select>
 				</div>
 			</div>
@@ -274,31 +274,55 @@
 			<div class="row question">
 				<div class="col-md-1"><p><b>4.</b></p></div>
 				<div class="col-md-7">
+					<p>On a scale of 1-10 (where 10 is the most engaged), please rate how <b>ENGAGING</b> you found the task:</p>
+				</div>
+				<div class="col-md-4">
+					<select id="engagement" name="engagement" class="posttestQ">
+						<option value="--" SELECTED>
+                        <option value="10">10 - Very engaging</option>
+                        <option value="9">9</option>
+                        <option value="8">8</option>
+                        <option value="7">7</option>
+                        <option value="6">6</option>
+                        <option value="5">5 - Moderately</option>
+                        <option value="4">4</option>
+                        <option value="3">3</option>
+                        <option value="2">2</option>
+                        <option value="1">1</option>
+                        <option value="0">0 - Not engaged</option>
+					</select>
+				</div>
+			</div>
+			<br/><br/>
+
+			<div class="row question">
+				<div class="col-md-1"><p><b>5.</b></p></div>
+				<div class="col-md-7">
 					<p>On a scale of 1-10 (where 10 is the most difficult), please rate how <b>DIFFICULT</b> you found the task:</p>
 				</div>
 				<div class="col-md-4">
 					<select id="difficulty" name="difficulty" class="posttestQ">
 						<option value="--" SELECTED>
-							<option value="10">10 - Very difficult</option>
-							<option value="9">9</option>
-							<option value="8">8</option>
-							<option value="7">7</option>
-							<option value="6">6</option>
-							<option value="5">5 - Moderately difficult</option>
-							<option value="4">4</option>
-							<option value="3">3</option>
-							<option value="2">2</option>
-							<option value="1">1</option>
-							<option value="0">0 - Not difficult at all</option>
+                        <option value="10">10 - Very difficult</option>
+                        <option value="9">9</option>
+                        <option value="8">8</option>
+                        <option value="7">7</option>
+                        <option value="6">6</option>
+                        <option value="5">5 - Moderately difficult</option>
+                        <option value="4">4</option>
+                        <option value="3">3</option>
+                        <option value="2">2</option>
+                        <option value="1">1</option>
+                        <option value="0">0 - Not difficult at all</option>
 					</select>
 				</div>
 			</div>
 			<br/><br/>
 
             <div class="row question">
-				<div class="col-md-1"><p><b>5.</b></p></div>
+				<div class="col-md-1"><p><b>6.</b></p></div>
 				<div class="col-md-7">
-					<p>Did you use a trackpad or mouse when completing the study?</p>
+					<p>Did you use a trackpad or a mouse when completing the study?</p>
 				</div>
 				<div class="col-md-4">
 					<select id="mouse_trackpad" name="mouse_trackpad" class="posttestQ">
@@ -313,22 +337,15 @@
 
 			<div class="row question">
 			  	<div class="col-md-12">
-			    	<p><b>6.</b> Which strategy did you use to solve the tasks? Did your strategy change over the course of this experiment? Please, be specific.</p>
+			    	<p><b>7.</b> Which strategy did you use to solve the tasks? Did your strategy change over the course of this experiment? Please, be specific.</p>
 			  	</div>
 			  	<div class="col-md-12">
-			    	<textarea id="answer1" name="answer1" class="posttestQ" maxlength="800" name="answer" rows="4" cols="50"></textarea>
+			    	<textarea id="strategy" name="strategy" class="posttestQ" maxlength="800" name="answer" rows="4" cols="50"></textarea>
 			  	</div>
 			</div>
 			<br/><br/>
 
-			<div class="row question">
-			  	<div class="col-md-12">
-			    	<p><b>7.</b> Did you discover any bugs in this experiment? If so, please provide a short description of the bug(s).</p>
-			  	</div>
-			  	<div class="col-md-12">
-			    	<textarea id="answer2" name="answer2" class="posttestQ" maxlength="400" name="answer" rows="4"></textarea>
-			  	</div>
-			</div>
+			
 
             <div class="row question">
 				<div class="col-md-1"><p><b>8.</b></p></div>
@@ -352,15 +369,28 @@
 			</div>
 			<br/><br/>
 
-			<br/>
-			<h3> To continue, please answer <span style="color:red">all questions</span>.</h3>
+            <div class="row question">
+                <div class="col-md-12">
+                  <p><b>Optional:</b> Did you discover any bugs in this experiment? If so, please provide a short description of the bug(s).</p>
+                </div>
+                <div class="col-md-12">
+                  <textarea id="bugs" name="bugs" class="posttestQ" maxlength="400" name="answer" rows="4"></textarea>
+                </div>
+            </div>
+			<br/><br/>
+			
+            <h3> To continue, please answer <span style="color:red">all questions</span>.</h3>
 			<br/>
 			<div align=center>
-				<button id="done_debrief"  class="btn-primary btn-lg"><b>Done</b></button>
+				<button id="done_debrief"><b>Done</b></button>
 			</div>
 			<br/>
 		</div>
 	</div>
+
+    <div id="thank_you">
+        <h1>Thanks for your participation! We hope you enjoyed the study.</h1>
+    </div>
 
 </body>
 

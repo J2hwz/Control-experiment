@@ -137,6 +137,7 @@ function start() {
     $('#experiment-trial').hide();
     $('#trial_score').hide();
     $('#demographics_debrief').hide();
+    $('#thank_you').hide();
     
 
     // Buttons for testing (skip explanations)
@@ -152,6 +153,14 @@ function start() {
     }); 
 
     setup_task();
+
+    // Hide buttons initially
+    $('#done_debrief').hide();
+
+    // Listen to whether all demographics questions are answered
+    $('.posttestQ').change(function() {
+        demographics_change_checker();
+    });
 }
 
 // Go to main task
@@ -160,6 +169,7 @@ function goto_task() {
     $('#experiment-trial').show();
     $('#trial_score').hide();
     $('#demographics_debrief').hide();
+    $('#thank_you').hide();
 
     // Set up Experimental Conditions
     trial = order[trial_count]; // Call the first causal graph condition 
@@ -178,6 +188,7 @@ function goto_demographics() {
     $('#experiment-trial').hide();
     $('#trial_score').hide();
     $('#demographics_debrief').show();
+    $('#thank_you').hide();
 }
 
 
@@ -625,6 +636,7 @@ function setup_interface() {
                 $('#experiment-trial').hide();
                 $('#trial_score').hide();
                 $('#demographics_debrief').show();
+                $('#thank_you').hide();
             }
         }
     });
@@ -890,7 +902,24 @@ function initialise_next_trial() {
     // $("#score_display").html("<b><font color=#D4AF37>Bonus Pay: £"+bonus+"</font></b>");
 }
 
+function demographics_change_checker() {
+    var dem_q = [
+        $('#age').val(),
+        $('#sex').val(),
+        $('#control').val(),
+        $('#engagement').val(),
+        $('#difficulty').val(),
+        $('#mouse_trackpad').val(),
+        $('#strategy').val(),
+        $('#concentration').val()
+    ]
 
+    if (dem_q[0] === "" || dem_q[1] === "noresp" || dem_q[2] === "--" || dem_q[3] === "--" || dem_q[4] === "--" || dem_q[5] === "noresp" || dem_q[6] === "" || dem_q[7] === "noresp") {
+        $('#done_debrief').hide();
+    } else {
+        $('#done_debrief').show();
+    }
+}
 
 
 // ---------------- HELPER FUNCTIONS ---------------- //
