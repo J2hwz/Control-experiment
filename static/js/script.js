@@ -17,11 +17,10 @@ var counter_balance_order = [];
 var conditions = ["P", "Q", "R", "S"];
 
 // Task variables
-var time_step = 100; 
+var time_step = 2000; 
 var timeout = 40; // Maximum number of steps per trial
 var trial_score = 0; // Score for each trial (successful control)
 var total_score = 10; // Start with 10 so they can make at least 10 interventions without going into the negative
-
 
 // Slider variables
 var xclicked = false;
