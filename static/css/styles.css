@@ -126,6 +126,7 @@ body {
 /* Individual image styles */
 .query_img {
     width: 250px; /* Set image width */
+    padding: 10px;
     height: auto; /* Maintain aspect ratio */
     cursor: pointer; /* Indicate interactivity */
     border: 2px solid transparent; /* Default border */
@@ -135,12 +136,13 @@ body {
 
 /* Highlight for the selected image */
 .image_container img.selected {
-    border: 3px solid gold; /* Blue border for selection */
-    border-radius: 1em;
+    /* border: 3px solid gold; 
+    border-radius: 1em; */
+    background-color: rgb(250, 234, 190);
 }
 
 /* Container for radio button options */
-.options {
+.causal_relationship_container {
     display: flex;
     justify-content: center;
     gap: 20px; /* Space between buttons */
@@ -148,12 +150,12 @@ body {
 }
 
 /* Hide radio buttons */
-.options input[type="radio"] {  
+.causal_relationship_container input[type="radio"] {  
     display: none;
 }
 
 /* Label styles for radio buttons */
-.options label {
+.causal_relationship_container label {
     padding: 10px 20px; /* Add padding for click area */
     border: 2px solid #ccc; /* Default border */
     border-radius: 10px; /* Rounded corners */
@@ -162,14 +164,14 @@ body {
 }
 
 /* Styles for selected radio buttons */
-.options input[type="radio"]:checked + label {
+.causal_relationship_container input[type="radio"]:checked + label {
     background-color: rgb(68, 88, 143); /* Highlight background */
     color: white; /* White text */
     border-color: rgb(68, 88, 143); /* Blue border */
 }
 
 /* Disabled label styles */
-.options label:disabled {
+.causal_relationship_container label:disabled {
     cursor: not-allowed; /* Show as non-interactive */
     opacity: 0.5; /* Dim appearance */
 }

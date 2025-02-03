@@ -3,6 +3,7 @@
 // Participant data
 var subject_data = [];
 var trial_data = {};
+var causal_query_data = {}
 
 // Trial variables
 var n_trials = 6;
@@ -17,7 +18,7 @@ var counter_balance_order = [];
 var conditions = ["P", "Q", "R", "S"];
 
 // Task variables
-var time_step = 2000; 
+var time_step = 20; 
 var timeout = 40; // Maximum number of steps per trial
 var trial_score = 0; // Score for each trial (successful control)
 var total_score = 10; // Start with 10 so they can make at least 10 interventions without going into the negative
@@ -50,8 +51,7 @@ var causes = {
 }
 
 // Causal Query variables
-var selected_structure = null; // To track selected structure for each trial
-
+var selected_structure = 0; // To track selected structure for each trial
 
 // Causal graph presets
 var presets = {
@@ -200,9 +200,6 @@ function setup_task() {
     // Randomise array containing trial order
     order = ex_randomiser(order_all);
 
-    // Hide slider Z that participants shouldn't control
-    // $("#slider-z").hide();  
-
     // Randomly choose condition and setup
     setup_condition();
 
@@ -217,6 +214,31 @@ function setup_task() {
 
     // Setup interface logic 
     setup_interface();
+
+    // Setup trial data 
+    trial_data = {
+        x_val: [],
+        y_val: [],
+        z_val: [],
+        x_int: [],
+        y_int: [],
+        z_int: [],
+        step_counter: [],
+        cum_int: [],
+        cum_total_score: [],
+        cum_trial_score: [],
+        reward: [],
+        trial_count: [],
+        graph: [],
+        cb_group: [],
+        has_focus: []
+    };
+
+    // Setup Causal Query data
+    causal_query_data = {
+        selected_structure: [],
+        selected_relationship: []
+    }
 }
 
 
@@ -321,7 +343,6 @@ function setup_condition(){
 
     } else if (condition == "Q"){
         // Low reward saliency, low control
-        // theta = .3 
         sigma = 2;
     } else if (condition == "R"){
         // High reward saliency, high control
@@ -329,11 +350,10 @@ function setup_condition(){
     } else {
         // High reward saliency, low control
         reward_width = 20;
-        // theta = .3
         sigma = 2;
     }
 
-    console.log(condition, theta, reward_width, sigma);
+    console.log("Condition: ", condition, "Reward width: ", reward_width, "Sigma: ", sigma);
 }
 
 
@@ -423,12 +443,9 @@ function set_reward_area() {
     rewardArea.css({
         "bottom": `${(reward_centre - reward_width + 100) * 0.5}%`,
         "height": `${reward_width}%`,
-        // "bottom": `50%`,
-        // "height": `20%`, 
         "background-color": shade_colour,
     })
     $(`#slider-handle-z`).after(rewardArea)
-    // $(`#custom-handle-${variableIdx}`).html(rewardHandle)
 }
 
 function setup_chart() {
@@ -542,6 +559,7 @@ function setup_interface() {
     //$('#task_next_round_btn').hide();
     // $('#task_cont_btn').hide();
     $('#view_score_button').hide();
+    // $('#next_trial_button').hide();
 
     // $("#countdown").html("Steps: 0/" + timeout);
 
@@ -554,11 +572,10 @@ function setup_interface() {
         $('#slider-z').slider('enable');
 
         count = 0;
-
-        record(x, y, z)
-
+        
         // Record data - 0th Step
-        // record(x, y, z, xclicked, yclicked, zclicked, 0, false, condition_count, condition, counter_balance_order[condition_count], Number(bonus), 1);
+        // console.log(x, y, z, xclicked, yclicked, zclicked, 0, 0, total_score, trial_score, false, trial_count, trial, counter_balance_order[trial_count], 1)
+        record(x, y, z, xclicked, yclicked, zclicked, 0, 0, total_score, trial_score, false, trial_count, trial, counter_balance_order[trial_count], 1)
         
         // Main game loop is here
         interval = setInterval(step, time_step)
@@ -566,22 +583,49 @@ function setup_interface() {
 
     // If view score button is clicked 
     $('#view_score_button').click(function() {
-        $('#next_trial_button').show();
+        console.log("Trial data:", trial_data)
 
         goto_score();
     });
 
+
+
+
+
     // If next trial button on the score display is clicked 
     $('#next_trial_button').click(function() {
-        $('#next_trial_button').hide();
+        const selected_radio = document.querySelector('.causal_relationship_container input[name="relationship"]:checked');
 
-        //Initialise New Condition or move on
-        if (trial_count < (n_trials - 1)){
-            initialise_next_trial();
+        if (selected_structure == 0 || selected_radio == null) {
+            alert('Please select both a structure and a relationship.')
         } else {
-            // $('#next_rnd_btn').hide();
-            // alert('You have completed the tasks! Press "Continue" to move to the debrief section.')
-            // $('#task_cont_btn').show();
+            // Save Causal Query Answers
+            var likert_relationship = Number(document.querySelector('.causal_relationship_container input[name="relationship"]:checked').value);
+            causal_query_data.selected_structure.push(selected_structure);
+            causal_query_data.selected_relationship.push(likert_relationship);
+            console.log(causal_query_data);
+
+            // Reset Causal Query - Remove highlight of causal structure
+            const images = document.querySelectorAll('.image_container img');
+            images.forEach(img => img.classList.remove('selected'));
+            selected_structure = 0;
+            
+            // Remove highlight from causal relationship buttons 
+            document.getElementById('regular').disabled = true;
+            document.getElementById('inverse').disabled = true;
+            document.querySelectorAll('input[name="relationship"]').forEach(input => input.checked = false);
+
+            //Initialise New Condition or move on
+            if (trial_count < (n_trials - 1)){
+                initialise_next_trial();
+            } else {
+                alert('You have completed all trials. You will now answer some final questions.');
+
+                $('#instructions').hide();
+                $('#experiment-trial').hide();
+                $('#trial_score').hide();
+                $('#demographics_debrief').show();
+            }
         }
     });
 }
@@ -636,16 +680,15 @@ function step() {
         }
         
         // Record whether participant had the tab open or closed
-        // if (document.hasFocus()) {
-        //     var focus = 1
-        // } else {
-        //     var focus = 0
-        // }
+        if (document.hasFocus()) {
+            var focus = 1
+        } else {
+            var focus = 0
+        }
 
         // Record data
-        record(x, y, z);
-        // Other variables for record function: xclicked, yclicked, zclicked, new_step, reward, condition_count, condition,counter_balance_order[condition_count], Number(bonus), focus
-        //console.log(x, y, z, xclicked, yclicked, zclicked, new_step, reward, condition_count, condition,counter_balance_order[condition_count],Number(bonus), focus);
+        record(x, y, z, xclicked, yclicked, zclicked, new_step, n_interventions, total_score, trial_score, reward, trial_count, trial, counter_balance_order[trial_count], focus);
+        // console.log(trial_data);
     }
 
     // Set xclicked (yclicked, zclicked) to false after ouNetwork() and data recording
@@ -743,53 +786,47 @@ function ouIncrement(variable_name, attractor) {
 }
 
 // --- Data recording for plot and data base --- //
-function record(x, y, z) {
-    // Other variables: int_x, int_y, int_z, new_step, reward, condition_count, condition, group, bonus, focus
+function record(x, y, z, int_x, int_y, int_z, new_step, n_interventions, total_score, trial_score, reward, trial_count, trial, random_counter_balance, focus) {
 
     //Graph
     xHist.push(x);
     yHist.push(y);
     zHist.push(z);
 
-    // Add interventions (which variable clicked during timestep)
-    // xInter.push(+ int_x);
-    // yInter.push(+ int_y);
-    // zInter.push(+ int_z);
-
-    // //Trial Data
-    // trial_data.x_val.push(x);
-    // trial_data.y_val.push(y);
-    // trial_data.z_val.push(z);
-    // trial_data.x_act.push(+ int_x);
-    // trial_data.y_act.push(+ int_y);
-    // trial_data.z_act.push(+ int_z);
-    // trial_data.step_counter.push(new_step);
-    // trial_data.rewards.push(reward);
-    // trial_data.condition_order.push(condition_count);
-    // trial_data.condition.push(condition);
-    // trial_data.group.push(group);
-    // trial_data.cum_bonus.push(bonus);
-    // trial_data.has_focus.push(focus);
+    //Trial Data
+    trial_data.x_val.push(x);
+    trial_data.y_val.push(y);
+    trial_data.z_val.push(z);
+    trial_data.x_int.push(+ int_x);
+    trial_data.y_int.push(+ int_y);
+    trial_data.z_int.push(+ int_z);
+    trial_data.step_counter.push(new_step);
+    trial_data.cum_int.push(n_interventions);
+    trial_data.cum_total_score.push(total_score);
+    trial_data.cum_trial_score.push(trial_score);
+    trial_data.reward.push(reward);
+    trial_data.trial_count.push(trial_count);
+    trial_data.graph.push(trial);
+    trial_data.cb_group.push(random_counter_balance);
+    trial_data.has_focus.push(focus);
 }
-
-
 
 // Function to handle image selection
 function select_structure(imageId) {
-  // Clear all image selections
-  const images = document.querySelectorAll('.image_container img');
-  images.forEach(img => img.classList.remove('selected'));
+    // Clear all image selections
+    const images = document.querySelectorAll('.image_container img');
+    images.forEach(img => img.classList.remove('selected'));
 
-  // Highlight the newly selected image
-  selectedImage = imageId;
-  document.getElementById(`img${imageId}`).classList.add('selected');
+    // Highlight the newly selected image
+    selected_structure = imageId;
+    document.getElementById(`img${imageId}`).classList.add('selected');
 
-  // Enable the radio buttons
-  document.getElementById('regular').disabled = false;
-  document.getElementById('inverse').disabled = false;
+    // Enable the radio buttons
+    document.getElementById('regular').disabled = false;
+    document.getElementById('inverse').disabled = false;
 
-  // Clear previous radio button selection (if any)
-  document.querySelectorAll('input[name="relationship"]').forEach(input => input.checked = false);
+    // Clear previous radio button selection (if any)
+    document.querySelectorAll('input[name="relationship"]').forEach(input => input.checked = false);
 }
 
 
