@@ -1,9 +1,12 @@
 //------------------------ Variables ------------------------//
 
 // Participant data
-var subject_data = [];
+var subject_data = {};
 var trial_data = {};
 var causal_query_data = {}
+
+var upi;
+var start_time = new Date();
 
 // Trial variables
 var n_trials = 6;
@@ -15,6 +18,7 @@ var counter_balance = ["A", "B"];
 var counter_balance_order = [];
 
 // Condition variables 
+var condition;
 var conditions = ["P", "Q", "R", "S"];
 
 // Task variables
@@ -152,6 +156,10 @@ function start() {
         goto_demographics();
     }); 
 
+    // Create upi 
+    upi = make_upi();
+    console.log(upi);
+
     setup_task();
 
     // Hide buttons initially
@@ -160,6 +168,51 @@ function start() {
     // Listen to whether all demographics questions are answered
     $('.posttestQ').change(function() {
         demographics_change_checker();
+    });
+
+    // Finished demographics (and study)
+    $('#done_debrief').click(function() {
+        
+        // Replace special characters for JSON Formatting
+        var feedback_1 = $('#strategy').val();
+        var feedback_2 = $('#bugs').val();
+        feedback_1 = feedback_1.replace(/\\/g, " *SLASH* "); // Replace backslashes (\) with double backslashes (\\)
+        feedback_1 = feedback_1.replace(/"/g, " *QUOTE* "); // Replace double quotation marks (") with escaped double quotation marks (\\")
+        feedback_1 = feedback_1.replace(/'/g, " *QUOTE* "); // Replace single quotation marks (') with escaped single quotation marks (\\')
+        feedback_1 = feedback_1.replace(/\n/g, " *NEWLINE* "); // Replace newline characters (\n) with a custom placeholder (*NEWLINE*)
+        feedback_2 = feedback_2.replace(/\\/g, " *SLASH* "); // Replace backslashes (\) with double backslashes (\\)
+        feedback_2 = feedback_2.replace(/"/g, " *QUOTE* "); // Replace double quotation marks (") with escaped double quotation marks (\\")
+        feedback_2 = feedback_2.replace(/'/g, " *QUOTE* "); // Replace single quotation marks (') with escaped single quotation marks (\\')
+        feedback_2 = feedback_2.replace(/\n/g, " *NEWLINE* "); // Replace newline characters (\n) with a custom placeholder (*NEWLINE*)
+
+        // Assemble subject data
+        subject_data = {
+            upi: upi,
+            start_time: start_time,
+            end_time: new Date(),
+            condition: condition, 
+            reward_width: reward_width, 
+            sigma: sigma,
+            cond_order: order,
+            counter_balance_order: counter_balance_order,
+            score: total_score,
+            // false_attempts:false_attempts,
+            causal_query_structure: causal_query_data.selected_structure,
+            causal_query_relationship: causal_query_data.selected_relationship,
+            age: $('#age').val(),
+            gender: $('#sex').val(),
+            control: $('#control').val(),
+            engagement:$('#engagement').val(),
+            difficulty: $('#difficulty').val(),
+            trackpad: $('#mouse_trackpad').val(),
+            strategy: feedback_1, //$('#answer1').val(),
+            concentration: $('#concentration').val(),
+            text_bug:feedback_2 //$('#answer2').val()
+        }
+        console.log(subject_data);
+        console.log(trial_data);
+        // save_data();
+        // goto_complete();
     });
 }
 
@@ -923,6 +976,18 @@ function demographics_change_checker() {
 
 
 // ---------------- HELPER FUNCTIONS ---------------- //
+
+// Function to create unique participant identifier
+function make_upi() {
+    var text = "";
+    var possible = "abcdefghijklmnopqrstuvwxyz";
+
+    for(var i=0; i < 10; i++) {
+        text += possible.charAt(Math.floor(Math.random() * possible.length));
+    }
+    return text;
+}
+
 
 // Function to randomise experimental conditions 
 function ex_randomiser(my_order){
